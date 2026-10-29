@@ -1,11 +1,11 @@
-# Codex ACP dans une sandbox SBX
+# Codex ACP in an SBX sandbox
 
-Ce projet exécute Codex et son serveur ACP dans une sandbox Docker Sandboxes.
-Zed, AionUI ou tout autre client ACP reste sur l'hôte et lance le serveur stdio
-avec `sbx exec -i`. Aucun port n'est publié : ACP utilise JSON-RPC sur stdin et
-stdout.
+This project runs Codex and its ACP server in a Docker Sandboxes sandbox.
+Zed, AionUI, or any other ACP client remains on the host and starts the stdio
+server with `sbx exec -i`. No port is published: ACP uses JSON-RPC over stdin
+and stdout.
 
-## Contenu
+## Contents
 
 ```text
 codex-acp/
@@ -16,59 +16,60 @@ codex-acp/
 └── workspace/
 ```
 
-`sbxenv.yaml` compose le kit Codex officiel épinglé et le mixin SBX v3 local.
-Le mixin installe `@agentclientprotocol/codex-acp@2.3.0`, qui inclut une version
-compatible du CLI Codex. Le wrapper hôte conserve stdin avec `-i` et n'alloue
-pas de pseudo-terminal, car un TTY corromprait le flux JSON-RPC ACP.
+`sbxenv.yaml` combines the pinned official Codex kit with the local SBX v3
+mixin. The mixin installs `@agentclientprotocol/codex-acp@2.3.0`, which
+includes a compatible version of the Codex CLI. The host wrapper keeps stdin
+open with `-i` and does not allocate a pseudo-terminal, because a TTY would
+corrupt the ACP JSON-RPC stream.
 
-## Prérequis
+## Prerequisites
 
-- Docker Desktop avec Docker Sandboxes et la commande `sbx` ;
-- une session `sbx login` valide ;
-- Zed ou AionUI installé sur l'hôte ;
-- un abonnement ChatGPT compatible ou une clé API OpenAI.
+- Docker Desktop with Docker Sandboxes and the `sbx` command;
+- a valid `sbx login` session;
+- Zed or AionUI installed on the host;
+- a compatible ChatGPT subscription or an OpenAI API key.
 
-Les commandes suivantes partent de ce dossier :
+The following commands assume you are in this directory:
 
 ```sh
 cd docker-demos/codex-acp
 ```
 
-## 1. Authentifier OpenAI
+## 1. Authenticate with OpenAI
 
-La méthode recommandée avec un abonnement ChatGPT est le stockage OAuth de
-SBX :
+The recommended method when using a ChatGPT subscription is SBX OAuth
+storage:
 
 ```sh
 sbx secret set openai --oauth
 ```
 
-Pour une clé API, laissez SBX la demander sans l'écrire dans l'historique du
-shell :
+For an API key, let SBX prompt for it so it is not written to your shell
+history:
 
 ```sh
 sbx secret set openai
 ```
 
-Le secret reste dans le credential store de SBX. Le kit Codex fournit au
-processus la variable proxy-gérée attendue ; la vraie valeur n'est pas copiée
-dans ce dépôt. `NO_BROWSER=1` masque volontairement le login navigateur depuis
-la sandbox, puisque l'authentification se fait sur l'hôte.
+The secret remains in the SBX credential store. The Codex kit provides the
+process with the expected proxy-managed environment variable; the real value
+is not copied into this repository. `NO_BROWSER=1` deliberately hides browser
+login from inside the sandbox because authentication takes place on the host.
 
-## 2. Créer l'environnement
+## 2. Create the environment
 
 ```sh
 sbx env create
 ```
 
-La commande affiche son plan et demande confirmation. Pour une exécution non
-interactive :
+The command displays its plan and asks for confirmation. For a non-interactive
+run:
 
 ```sh
 sbx env create --force
 ```
 
-Vérifiez ensuite les binaires :
+Then verify the binaries:
 
 ```sh
 sbx exec codex-acp npm list --global --depth=0 @agentclientprotocol/codex-acp@2.3.0
@@ -76,16 +77,16 @@ sbx exec codex-acp command -v codex-acp
 sbx exec codex-acp codex --version
 ```
 
-## 3. Vérifier le transport ACP
+## 3. Verify the ACP transport
 
-Le serveur ACP attend un client sur stdin ; il est donc normal que cette
-commande reste ouverte sans afficher d'interface :
+The ACP server waits for a client on stdin, so it is normal for this command
+to remain open without displaying an interface:
 
 ```sh
 ./bin/codex-acp-sbx
 ```
 
-Interrompez ce test avec `Ctrl-C`. Pour diagnostiquer la sandbox :
+Stop this test with `Ctrl-C`. To diagnose the sandbox:
 
 ```sh
 sbx exec codex-acp sh -lc 'id; pwd; command -v codex-acp; command -v codex'
@@ -95,24 +96,24 @@ sbx exec codex-acp sh -lc 'ls -la /home/agent/.codex/logs'
 
 ## Zed
 
-Zed doit lancer `codex-acp` dans la sandbox avec `sbx exec`, et non utiliser
-son Codex local du registre ACP.
+Zed must start `codex-acp` in the sandbox with `sbx exec`, rather than use its
+local Codex installation from the ACP registry.
 
-1. Récupérez le chemin absolu du workspace :
+1. Get the absolute workspace path:
 
    ```sh
    realpath ./workspace
    ```
 
-2. Dans Zed, lancez `agent: open settings`, ouvrez **External Agents**, puis
+2. In Zed, run `agent: open settings`, open **External Agents**, then choose
    **Add Agent > Add Custom Agent**.
-3. Reprenez l'entrée de `configs/zed-settings.jsonc` dans le `settings.json` de
-   Zed. Remplacez le chemin `/ABSOLUTE/PATH/TO/...` par le résultat de l'étape
-   précédente.
-4. Ouvrez le dossier `workspace` dans Zed.
-5. Dans l'Agent Panel, choisissez **Codex SBX** et créez un thread.
+3. Copy the entry from `configs/zed-settings.jsonc` into Zed's `settings.json`.
+   Replace the `/ABSOLUTE/PATH/TO/...` path with the result from the previous
+   step.
+4. Open the `workspace` directory in Zed.
+5. In the Agent Panel, select **Codex SBX** and create a thread.
 
-Configuration complète :
+Complete configuration:
 
 ```json
 {
@@ -124,7 +125,7 @@ Configuration complète :
         "exec",
         "-i",
         "-w",
-        "/chemin/absolu/codex-acp/workspace",
+        "/absolute/path/to/codex-acp/workspace",
         "codex-acp",
         "codex-acp"
       ],
@@ -134,93 +135,93 @@ Configuration complète :
 }
 ```
 
-La commande correspond exactement à :
+The command corresponds exactly to:
 
 ```sh
-sbx exec -i -w /chemin/absolu/codex-acp/workspace codex-acp codex-acp
+sbx exec -i -w /absolute/path/to/codex-acp/workspace codex-acp codex-acp
 ```
 
-La première occurrence de `codex-acp` est le nom de la sandbox ; la seconde est
-la commande exécutée dedans. `-i` conserve stdin ouvert pour ACP. N'ajoutez pas
-`-t` : un pseudo-terminal perturberait le flux JSON-RPC.
+The first `codex-acp` is the sandbox name; the second is the command executed
+inside it. `-i` keeps stdin open for ACP. Do not add `-t`: a pseudo-terminal
+would interfere with the JSON-RPC stream.
 
-Le wrapper `bin/codex-acp-sbx` reste disponible si vous préférez centraliser le
-nom et le workspace :
+The `bin/codex-acp-sbx` wrapper remains available if you prefer to centralize
+the sandbox name and workspace:
 
 ```json
 {
   "agent_servers": {
     "Codex SBX (wrapper)": {
       "type": "custom",
-      "command": "/chemin/absolu/codex-acp/bin/codex-acp-sbx",
+      "command": "/absolute/path/to/codex-acp/bin/codex-acp-sbx",
       "args": [],
       "env": {
         "CODEX_ACP_SANDBOX": "codex-acp",
-        "CODEX_ACP_WORKDIR": "/chemin/absolu/codex-acp/workspace"
+        "CODEX_ACP_WORKDIR": "/absolute/path/to/codex-acp/workspace"
       }
     }
   }
 }
 ```
 
-En cas d'échec, utilisez `dev: open acp logs` dans la palette Zed. Si Zed a été
-lancé graphiquement et ne trouve pas `sbx`, utilisez son chemin absolu comme
-valeur de `command` ou employez le wrapper.
+If it fails, run `dev: open acp logs` from the Zed command palette. If Zed was
+started graphically and cannot find `sbx`, use its absolute path as the
+`command` value or use the wrapper.
 
 ## AionUI
 
-AionUI sait créer un **Custom Agent** ACP utilisant un processus stdio.
+AionUI can create an ACP **Custom Agent** that uses a stdio process.
 
-1. Ouvrez **Settings > Agents**, puis l'onglet **Custom Agents**.
-2. Créez un agent et renseignez :
+1. Open **Settings > Agents**, then the **Custom Agents** tab.
+2. Create an agent and enter:
 
-   - Name : `Codex SBX`
-   - Connection/transport : `stdio` ou `CLI`
-   - Command/CLI path : le chemin absolu retourné par
+   - Name: `Codex SBX`
+   - Connection/transport: `stdio` or `CLI`
+   - Command/CLI path: the absolute path returned by
      `realpath ./bin/codex-acp-sbx`
-   - Arguments : aucun
-   - Environment : `CODEX_ACP_SANDBOX=codex-acp` et
-     `CODEX_ACP_WORKDIR=<chemin absolu retourné par realpath ./workspace>`
+   - Arguments: none
+   - Environment: `CODEX_ACP_SANDBOX=codex-acp` and
+     `CODEX_ACP_WORKDIR=<absolute path returned by realpath ./workspace>`
 
-3. Utilisez **Test Connection**, sauvegardez et activez l'agent.
-4. Créez une conversation avec **Codex SBX** et sélectionnez `workspace` comme
-   espace de travail.
+3. Use **Test Connection**, save, and enable the agent.
+4. Create a conversation with **Codex SBX** and select `workspace` as the
+   workspace.
 
-Selon la version d'AionUI, les champs peuvent être présentés dans un éditeur
-JSON avancé. Le contrat reste identique : exécutable = wrapper, arguments =
-tableau vide, environnement = les deux variables ci-dessus, transport = stdio.
+Depending on the AionUI version, these fields may appear in an advanced JSON
+editor. The contract remains the same: executable = wrapper, arguments = empty
+array, environment = the two variables above, transport = stdio.
 
-## Utiliser un autre projet
+## Use another project
 
-Modifiez ensemble :
+Update both of the following:
 
-1. `workspace:` dans `sbxenv.yaml` ;
-2. `CODEX_ACP_WORKDIR` dans Zed ou AionUI.
+1. `workspace:` in `sbxenv.yaml`;
+2. `CODEX_ACP_WORKDIR` in Zed or AionUI.
 
-Puis recréez l'environnement :
+Then recreate the environment:
 
 ```sh
 sbx env rm
 sbx env create
 ```
 
-Vous pouvez aussi conserver ce fichier et remplacer le contenu de `workspace/`.
+You can also keep this file and replace the contents of `workspace/`.
 
-## Cycle de vie
+## Lifecycle
 
 ```sh
-sbx env create              # créer
-sbx exec -it codex-acp sh   # shell de diagnostic seulement
-sbx env rm                  # supprimer la sandbox
+sbx env create              # create
+sbx exec -it codex-acp sh   # diagnostic shell only
+sbx env rm                  # remove the sandbox
 ```
 
-N'ajoutez jamais `-t` au lancement ACP. Ne placez jamais une clé dans
-`sbxenv.yaml`, la configuration Zed/AionUI ou le wrapper.
+Never add `-t` when starting ACP. Never put a key in `sbxenv.yaml`, the
+Zed/AionUI configuration, or the wrapper.
 
-## Références
+## References
 
 - [Agent Client Protocol](https://agentclientprotocol.com/get-started/introduction)
 - [Codex ACP](https://github.com/agentclientprotocol/codex-acp)
-- [Agents externes Zed](https://zed.dev/docs/ai/external-agents)
-- [Documentation officielle du CLI Codex](https://developers.openai.com/codex/cli/)
+- [Zed external agents](https://zed.dev/docs/ai/external-agents)
+- [Official Codex CLI documentation](https://developers.openai.com/codex/cli/)
 - [AionUI](https://www.aionui.com/en)
