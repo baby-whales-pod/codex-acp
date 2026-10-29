@@ -190,6 +190,56 @@ Selon la version d'AionUI, les champs peuvent être présentés dans un éditeur
 JSON avancé. Le contrat reste identique : exécutable = wrapper, arguments =
 tableau vide, environnement = les deux variables ci-dessus, transport = stdio.
 
+## Obsidian avec le plugin Agent Client
+
+Le fichier `sbxenv.obsidian.yaml` permet d'utiliser un vault Obsidian comme
+workspace de la sandbox. Obsidian et le plugin restent sur l'hôte ; Agent
+Client lance le wrapper, qui démarre `codex-acp` dans la sandbox via stdio.
+
+1. Dans `sbxenv.obsidian.yaml`, remplacez la valeur de `workspace:` par le
+   chemin absolu de votre vault. Le chemin ne doit pas pointer vers le seul
+   dossier `.obsidian`, mais vers la racine du vault :
+
+   ```yaml
+   workspace: /chemin/absolu/vers/mon-vault
+   ```
+
+2. Créez l'environnement dédié après avoir configuré le secret OpenAI comme
+   expliqué plus haut :
+
+   ```sh
+   sbx env create sbxenv.obsidian.yaml
+   ```
+
+   Cette configuration crée une sandbox nommée `codex-acp-obsidian`.
+
+3. Dans Obsidian, ouvrez **Settings > Community Plugins > Browse**, recherchez
+   **Agent Client**, puis installez et activez le plugin.
+4. Ouvrez **Settings > Agent Client**, descendez jusqu'à **Custom Agents**, puis
+   choisissez **Add custom agent** et renseignez :
+
+   - Agent ID : `codex-sbx`
+   - Display name : `Codex SBX`
+   - Path : le chemin absolu retourné par
+     `realpath ./bin/codex-acp-sbx`
+   - Arguments : aucun
+   - Environment variables, une par ligne :
+
+     ```text
+     CODEX_ACP_SANDBOX=codex-acp-obsidian
+     CODEX_ACP_WORKDIR=/chemin/absolu/vers/mon-vault
+     ```
+
+5. Cliquez sur l'icône robot dans le ruban Obsidian, sélectionnez **Codex SBX**
+   dans la liste des agents et démarrez une conversation. Vous pouvez
+   mentionner des notes avec `@` ; Codex peut lire et modifier les fichiers du
+   vault monté comme workspace.
+
+Le plugin doit utiliser l'agent personnalisé ci-dessus, et non son preset
+Codex local. L'authentification reste gérée par le secret SBX : ne renseignez
+pas de clé API dans Agent Client. Gardez la validation des permissions activée
+et vérifiez les modifications proposées avant de les accepter.
+
 ## Utiliser un autre projet
 
 Modifiez ensemble :
@@ -224,3 +274,4 @@ N'ajoutez jamais `-t` au lancement ACP. Ne placez jamais une clé dans
 - [Agents externes Zed](https://zed.dev/docs/ai/external-agents)
 - [Documentation officielle du CLI Codex](https://developers.openai.com/codex/cli/)
 - [AionUI](https://www.aionui.com/en)
+- [Plugin Agent Client pour Obsidian](https://github.com/RAIT-09/obsidian-agent-client)

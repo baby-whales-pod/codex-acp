@@ -191,6 +191,55 @@ Depending on the AionUI version, these fields may appear in an advanced JSON
 editor. The contract remains the same: executable = wrapper, arguments = empty
 array, environment = the two variables above, transport = stdio.
 
+## Obsidian with the Agent Client plugin
+
+The `sbxenv.obsidian.yaml` file lets you use an Obsidian vault as the sandbox
+workspace. Obsidian and the plugin remain on the host; Agent Client starts the
+wrapper, which launches `codex-acp` in the sandbox over stdio.
+
+1. In `sbxenv.obsidian.yaml`, replace the `workspace:` value with the absolute
+   path to your vault. The path must point to the vault root, not only to its
+   `.obsidian` directory:
+
+   ```yaml
+   workspace: /absolute/path/to/my-vault
+   ```
+
+2. After configuring the OpenAI secret as described above, create the
+   dedicated environment:
+
+   ```sh
+   sbx env create sbxenv.obsidian.yaml
+   ```
+
+   This configuration creates a sandbox named `codex-acp-obsidian`.
+
+3. In Obsidian, open **Settings > Community Plugins > Browse**, search for
+   **Agent Client**, then install and enable the plugin.
+4. Open **Settings > Agent Client**, scroll to **Custom Agents**, choose
+   **Add custom agent**, and enter:
+
+   - Agent ID: `codex-sbx`
+   - Display name: `Codex SBX`
+   - Path: the absolute path returned by
+     `realpath ./bin/codex-acp-sbx`
+   - Arguments: none
+   - Environment variables, one per line:
+
+     ```text
+     CODEX_ACP_SANDBOX=codex-acp-obsidian
+     CODEX_ACP_WORKDIR=/absolute/path/to/my-vault
+     ```
+
+5. Click the robot icon in the Obsidian ribbon, select **Codex SBX** from the
+   agent list, and start a conversation. You can mention notes with `@`; Codex
+   can read and edit files in the vault mounted as its workspace.
+
+The plugin must use the custom agent above rather than its local Codex preset.
+Authentication remains managed by the SBX secret, so do not enter an API key
+in Agent Client. Keep permission confirmation enabled and review proposed
+changes before accepting them.
+
 ## Use another project
 
 Update both of the following:
@@ -225,3 +274,4 @@ Zed/AionUI configuration, or the wrapper.
 - [Zed external agents](https://zed.dev/docs/ai/external-agents)
 - [Official Codex CLI documentation](https://developers.openai.com/codex/cli/)
 - [AionUI](https://www.aionui.com/en)
+- [Agent Client plugin for Obsidian](https://github.com/RAIT-09/obsidian-agent-client)
