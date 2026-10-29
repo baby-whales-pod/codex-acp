@@ -1,0 +1,34 @@
+# syntax=docker/sandbox-kit:3
+schemaVersion: "3"
+kind: mixin
+displayName: Codex ACP
+description: Run Codex as an ACP stdio agent from a client outside the sandbox.
+requires:
+  - codex
+provides:
+  - codex-acp@2.3.0
+
+capabilities:
+  - type: com.docker.sandbox/network-policy@1
+    config:
+      runtime:
+        allow:
+          - api.openai.com
+          - auth.openai.com
+          - chatgpt.com
+          - registry.npmjs.org
+  - type: com.docker.sandbox/lifecycle@1
+    config:
+      install:
+        - command:
+            - sh
+            - -ec
+            - |
+              command -v node >/dev/null
+              command -v npm >/dev/null
+              npm install --global --omit=dev --ignore-scripts @agentclientprotocol/codex-acp@2.3.0
+              command -v codex-acp >/dev/null
+              npm list --global --depth=0 @agentclientprotocol/codex-acp@2.3.0
+              install -d -o agent -g agent /home/agent/.codex/logs
+          user: "0"
+          description: Install the pinned Codex ACP adapter and its compatible Codex CLI

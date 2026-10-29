@@ -1,0 +1,17 @@
+{
+  "agent_servers": {
+    "Codex SBX": {
+      "type": "custom",
+      "command": "sbx",
+      "args": [
+        "exec",
+        "-i",
+        "-w",
+        "/ABSOLUTE/PATH/TO/docker-demos/codex-acp/workspace",
+        "codex-acp",
+        "codex-acp"
+      ],
+      "env": {}
+    }
+  }
+}

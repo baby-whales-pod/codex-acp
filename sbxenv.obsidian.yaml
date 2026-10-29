@@ -1,0 +1,28 @@
+# sbx env create sbxenv.yaml
+
+schemaVersion: "1"
+
+name: codex-acp-obsidian
+agent: sbx-kit-codex
+
+kits:
+  - source: docker/sbx-kit-codex:0.162.1
+  - ./kits/codex-acp
+
+#workspace: ./workspace
+workspace: /Users/k33g/Documents/k33g-obsidian-vault
+
+env:
+  NO_BROWSER: "1"
+  APP_SERVER_LOGS: /home/agent/.codex/logs
+
+bindings:
+  openai:
+    apiKey:
+      domains:
+        - api.openai.com
+    oauth:
+      domains:
+        - auth.openai.com
+        - chatgpt.com
+

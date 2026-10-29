@@ -1,0 +1,24 @@
+schemaVersion: "1"
+name: codex-acp
+agent: sbx-kit-codex
+
+kits:
+  - source: docker/sbx-kit-codex:0.162.1
+  - ./kits/codex-acp
+
+workspace: ./workspace
+
+env:
+  NO_BROWSER: "1"
+  APP_SERVER_LOGS: /home/agent/.codex/logs
+
+bindings:
+  openai:
+    apiKey:
+      domains:
+        - api.openai.com
+    oauth:
+      domains:
+        - auth.openai.com
+        - chatgpt.com
+
